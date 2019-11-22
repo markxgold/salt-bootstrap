@@ -84,7 +84,7 @@ Param(
     [string]$repourl= "http://ezoka.net/wp-content/uploads",
 
     [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
-    [string]$dir= "not-specified",
+    [string]$dir= "$env:programfiles\Ezoka\salt",
 
     [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
     [string]$conf= "minion"
