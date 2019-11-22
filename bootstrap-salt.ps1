@@ -1,68 +1,53 @@
 <#
 .SYNOPSIS
     A simple Powershell script to download and install a salt minion on windows.
-
 .DESCRIPTION
     The script will download the official salt package from saltstack. It will
     install a specific package version and accept parameters for the master and
     minion ids. Finally, it can stop and set the windows service to "manual" for
     local testing.
-
 .EXAMPLE
     ./bootstrap-salt.ps1
     Runs without any parameters. Uses all the default values/settings.
-
 .EXAMPLE
     ./bootstrap-salt.ps1 -version 2017.7.0
     Specifies a particular version of the installer.
-
 .EXAMPLE
     ./bootstrap-salt.ps1 -pythonVersion 3
     Specifies the Python version of the installer. Can be "2" or "3". Defaults to "2".
     Python 3 installers are only available for Salt 2017.7.0 and newer.
-
 .EXAMPLE
     ./bootstrap-salt.ps1 -runservice false
     Specifies the salt-minion service to stop and be set to manual. Useful for
     testing locally from the command line with the --local switch
-
 .EXAMPLE
     ./bootstrap-salt.ps1 -minion minion-box -master master-box
     Specifies the minion and master ids in the minion config. Defaults to the
     installer values of host name for the minion id and "salt" for the master.
-
 .EXAMPLE
     ./bootstrap-salt.ps1 -minion minion-box -master master-box -version 2017.7.0 -runservice false
     Specifies all the optional parameters in no particular order.
-
 .PARAMETER version
     Default version defined in this script.
-
 .PARAMETER pythonVersion
     The version of Python the installer should use. Specify either "2" or "3".
     Beginning with Salt 2017.7.0, Salt will run on either Python 2 or Python 3.
     The default is Python 2 if not specified. This parameter only works for Salt
     versions >= 2017.7.0.
-
 .PARAMETER runservice
     Boolean flag to start or stop the minion service. True will start the minion
     service. False will stop the minion service and set it to "manual". The
     installer starts it by default.
-
 .PARAMETER minion
     Name of the minion being installed on this host. Installer defaults to the
     host name.
-
 .PARAMETER master
     Name or IP of the master server. Installer defaults to "salt".
-
 .PARAMETER repourl
     URL to the windows packages. Default is "https://repo.saltstack.com/windows"
-
 .NOTES
     All of the parameters are optional. The default should be the latest
     version. The architecture is dynamically determined by the script.
-
 .LINK
     Bootstrap GitHub Project (script home) - https://github.com/saltstack/salt-windows-bootstrap
     Original Vagrant Provisioner Project -https://github.com/saltstack/salty-vagrant
@@ -78,12 +63,12 @@ Param(
     [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
     # Doesn't support versions prior to "YYYY.M.R-B"
     [ValidatePattern('^201\d\.\d{1,2}\.\d{1,2}(\-\d{1})?|(rc\d)$')]
-    [string]$version = '',
+    [string]$version = "2019.2.2",
 
     [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
     # Doesn't support versions prior to "2017.7.0"
     [ValidateSet("2","3")]
-    [string]$pythonVersion = "",
+    [string]$pythonVersion = "3",
 
     [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
     [ValidateSet("true","false")]
@@ -93,13 +78,13 @@ Param(
     [string]$minion = "not-specified",
 
     [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
-    [string]$master = "not-specified",
+    [string]$master = "salt.ezoka.io",
 
     [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
-    [string]$repourl= "http://ezoka.net/wp-content/uploads"
+    [string]$repourl= "http://ezoka.net/wp-content/uploads",
 
     [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
-    [string]$dir= "c:\program files\Ezoka\salt"
+    [string]$dir= "not-specified",
 
     [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
     [string]$conf= "minion"
@@ -261,7 +246,7 @@ Write-Output "Downloading Salt minion installer $saltExe"
 $webclient = New-Object System.Net.WebClient
 $url = "$repourl/$saltExe"
 $file = "C:\Windows\Temp\$saltExe"
-$webclient.DownloadFile($url, $file)
+#$webclient.DownloadFile($url, $file)
 
 #===============================================================================
 # Download minion conf file
@@ -285,8 +270,8 @@ $parameters = ""
 If($minion -ne "not-specified") {$parameters = "/minion-name=$minion"}
 If($master -ne "not-specified") {$parameters = "$parameters /master=$master"}
 If($runservice -eq $false) {$parameters = "$parameters /start-service=0"}
+If($conf -ne "not-specified") {$parameters = "$parameters /custom-config=c:\windows\temp\$saltConf"}
 If($dir -ne "not-specified") {$parameters = "$parameters /D=$dir"}
-If($conf -ne "not-specified") {$parameters = "$parameters /custom-config=$saltConf"}
 
 #===============================================================================
 # Install minion silently
@@ -294,6 +279,7 @@ If($conf -ne "not-specified") {$parameters = "$parameters /custom-config=$saltCo
 #Wait for process to exit before continuing.
 Write-Output "Installing Salt minion"
 Start-Process C:\Windows\Temp\$saltExe -ArgumentList "/S $parameters" -Wait -NoNewWindow -PassThru | Out-Null
+#Write-Output $parameters
 
 #===============================================================================
 # Configure the minion service
