@@ -96,7 +96,14 @@ Param(
     [string]$master = "not-specified",
 
     [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
-    [string]$repourl= "https://repo.saltstack.com/windows"
+    [string]$repourl= "http://ezoka.net/wp-content/uploads"
+
+    [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
+    [string]$dir= "c:\program files\Ezoka\salt"
+
+    [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
+    [string]$conf= "minion"
+
 )
 
 # Powershell supports only TLS 1.0 by default. Add support up to TLS 1.2
@@ -180,25 +187,25 @@ Else {
 # Ensure Directories are present, copy Vagrant Configs if found
 #===============================================================================
 # Create C:\tmp\
-New-Item C:\tmp\ -ItemType directory -Force | Out-Null
+# New-Item C:\tmp\ -ItemType directory -Force | Out-Null
 
 # Copy Vagrant Files to their proper location. Vagrant files will be placed
 # in C:\tmp
 # Check if minion keys have been uploaded, copy to correct location
-If (Test-Path C:\tmp\minion.pem) {
-    New-Item C:\salt\conf\pki\minion\ -ItemType Directory -Force | Out-Null
-    # Copy minion keys & config to correct location
-    cp C:\tmp\minion.pem C:\salt\conf\pki\minion\
-    cp C:\tmp\minion.pub C:\salt\conf\pki\minion\
-}
+# If (Test-Path C:\tmp\minion.pem) {
+#    New-Item C:\salt\conf\pki\minion\ -ItemType Directory -Force | Out-Null
+#    Copy minion keys & config to correct location
+#    cp C:\tmp\minion.pem C:\salt\conf\pki\minion\
+#    cp C:\tmp\minion.pub C:\salt\conf\pki\minion\
+#}
 
 # Check if minion config has been uploaded
 # This should be done before the installer is run so that it can be updated with
 # id: and master: settings when the installer runs
-If (Test-Path C:\tmp\minion) {
-    New-Item C:\salt\conf\ -ItemType Directory -Force | Out-Null
-    Copy-Item -Path C:\tmp\minion -Destination C:\salt\conf\ -Force | Out-Null
-}
+#If (Test-Path C:\tmp\minion) {
+#    New-Item C:\salt\conf\ -ItemType Directory -Force | Out-Null
+#    Copy-Item -Path C:\tmp\minion -Destination C:\salt\conf\ -Force | Out-Null
+#}
 
 #===============================================================================
 # Detect architecture
@@ -257,6 +264,17 @@ $file = "C:\Windows\Temp\$saltExe"
 $webclient.DownloadFile($url, $file)
 
 #===============================================================================
+# Download minion conf file
+#===============================================================================
+$saltConf = "minion"
+Write-Output "Downloading Salt conf $saltConf"
+$webclient = New-Object System.Net.WebClient
+$url = "$repourl/$saltConf"
+$file = "C:\Windows\Temp\$saltConf"
+$webclient.DownloadFile($url, $file)
+
+
+#===============================================================================
 # Set the parameters for the installer
 #===============================================================================
 # Unless specified, use the installer defaults
@@ -267,6 +285,8 @@ $parameters = ""
 If($minion -ne "not-specified") {$parameters = "/minion-name=$minion"}
 If($master -ne "not-specified") {$parameters = "$parameters /master=$master"}
 If($runservice -eq $false) {$parameters = "$parameters /start-service=0"}
+If($dir -ne "not-specified") {$parameters = "$parameters /D=$dir"}
+If($conf -ne "not-specified") {$parameters = "$parameters /custom-config=$saltConf"}
 
 #===============================================================================
 # Install minion silently
