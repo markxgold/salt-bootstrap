@@ -246,7 +246,7 @@ Write-Output "Downloading Salt minion installer $saltExe"
 $webclient = New-Object System.Net.WebClient
 $url = "$repourl/$saltExe"
 $file = "C:\Windows\Temp\$saltExe"
-#$webclient.DownloadFile($url, $file)
+$webclient.DownloadFile($url, $file)
 
 #===============================================================================
 # Download minion conf file
