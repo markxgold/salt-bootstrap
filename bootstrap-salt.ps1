@@ -87,7 +87,7 @@ Param(
     [string]$dir= "$env:programfiles\Ezoka\salt",
 
     [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
-    [string]$conf= "minion"
+    [string]$conf= "not-specified"
 
 )
 
@@ -251,13 +251,14 @@ $webclient.DownloadFile($url, $file)
 #===============================================================================
 # Download minion conf file
 #===============================================================================
-$saltConf = "minion"
-Write-Output "Downloading Salt conf $saltConf"
-$webclient = New-Object System.Net.WebClient
-$url = "$repourl/$saltConf"
-$file = "C:\Windows\Temp\$saltConf"
-$webclient.DownloadFile($url, $file)
-
+If($conf -ne "not-specified")
+{$saltConf = "minion"
+    Write-Output "Downloading Salt conf $saltConf"
+    $webclient = New-Object System.Net.WebClient
+    $url = "$repourl/$saltConf"
+    $file = "C:\Windows\Temp\$saltConf"
+    $webclient.DownloadFile($url, $file)
+}
 
 #===============================================================================
 # Set the parameters for the installer
