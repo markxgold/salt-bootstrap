@@ -81,7 +81,7 @@ Param(
     [string]$master = "salt.ezoka.io",
 
     [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
-    [string]$repourl= "http://ezoka.net/wp-content/uploads",
+    [string]$repourl= "https://packages.ezoka.io",
 
     [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
     [string]$dir= "$env:programfiles\Ezoka\salt",
