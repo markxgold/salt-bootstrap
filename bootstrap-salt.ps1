@@ -87,7 +87,7 @@ Param(
     [string]$dir= "$env:programfiles\Ezoka\salt",
 
     [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
-    [string]$conf= "minion"
+    [string]$conf= "not-specified"
 
 )
 
