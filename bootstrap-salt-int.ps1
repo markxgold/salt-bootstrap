@@ -92,7 +92,7 @@ Param(
 )
 
 # Powershell supports only TLS 1.0 by default. Add support up to TLS 1.2
-[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]'Tls,Tls11,Tls12'
+[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]'Tls12,Tls11,Tls'
 
 #===============================================================================
 # Script Functions
